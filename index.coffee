@@ -30,6 +30,7 @@ class SitemapParser
 		isURLSet = false
 		isSitemapIndex = false
 		inLoc = false
+		hasError = false
 
 		@visited_sitemaps[url] = true
 
@@ -39,6 +40,7 @@ class SitemapParser
 			isURLSet = true if node.name is 'urlset'
 			isSitemapIndex = true if node.name is 'sitemapindex'
 		parserStream.on 'error', (err) =>
+			hasError = true
 			done err
 		parserStream.on 'text', (text) =>
 			text = urlParser.resolve url, text
@@ -51,7 +53,8 @@ class SitemapParser
 					else
 						@sitemap_cb text
 		parserStream.on 'end', () =>
-			done null
+			if !hasError
+				done null
 
 		@_download url, parserStream, done
 
